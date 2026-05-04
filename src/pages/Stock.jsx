@@ -1,16 +1,28 @@
-import { useState } from 'react'
-import { BLOOD_STOCK } from '../data/dummyData'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import { Droplets, AlertTriangle, ArrowUpRight } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 const Stock = () => {
-  const [stocks, setStocks] = useState(BLOOD_STOCK)
+  const [stocks, setStocks] = useState([])
 
-  const updateUnits = (group) => {
+  useEffect(() => { fetchStock() }, [])
+
+  const fetchStock = async () => {
+    try {
+      const res = await axios.get('/api/bloodstock')
+      setStocks(res.data)
+    } catch (e) { toast.error('Failed to load stock') }
+  }
+
+  const updateUnits = async (group) => {
     const amount = prompt('Enter new unit count for ' + group)
     if (amount !== null && !isNaN(amount)) {
-      setStocks(stocks.map(s => s.group === group ? { ...s, units: parseInt(amount) } : s))
-      toast.success(`Updated ${group} stock to ${amount} units`)
+      try {
+        await axios.put(`/api/bloodstock/${encodeURIComponent(group)}`, { units: parseInt(amount) })
+        toast.success(`Updated ${group} stock to ${amount} units`)
+        fetchStock()
+      } catch (e) { toast.error('Failed to update stock') }
     }
   }
 
@@ -18,7 +30,7 @@ const Stock = () => {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h2 className="text-2xl font-bold text-slate-800">Inventory Management</h2>
-        <p className="text-slate-500 text-sm mt-1">Real-time blood unit availability across all groups.</p>
+        <p className="text-slate-500 text-sm mt-1">Real-time blood unit availability across all groups from MySQL Database.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -41,7 +53,7 @@ const Stock = () => {
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Group {stock.group}</p>
+              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Group {stock.blood_group}</p>
               <div className="flex items-baseline gap-2">
                 <h3 className="text-4xl font-black text-slate-800">{stock.units}</h3>
                 <span className="text-slate-400 font-bold text-sm">Units</span>
@@ -50,7 +62,7 @@ const Stock = () => {
 
             <div className="mt-6 pt-6 border-t border-slate-100">
               <button 
-                onClick={() => updateUnits(stock.group)}
+                onClick={() => updateUnits(stock.blood_group)}
                 className="w-full py-2 flex items-center justify-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors group-hover:bg-slate-50 rounded-xl"
               >
                 <span>Update Stock</span>
@@ -65,7 +77,7 @@ const Stock = () => {
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="max-w-md">
             <h3 className="text-2xl font-bold mb-2">Automated Procurement</h3>
-            <p className="text-slate-400 text-sm">The system automatically flags groups falling below 5 units and notifies nearby donors. Current low stock groups: {stocks.filter(s => s.units < 5).map(s => s.group).join(', ')}.</p>
+            <p className="text-slate-400 text-sm">The system automatically flags groups falling below 5 units and notifies nearby donors. Current low stock groups: {stocks.filter(s => s.units < 5).map(s => s.blood_group).join(', ') || 'None'}.</p>
           </div>
           <button className="bg-white text-slate-900 px-8 py-3 rounded-2xl font-bold hover:bg-slate-100 transition-colors shrink-0">
             Order Supplies
