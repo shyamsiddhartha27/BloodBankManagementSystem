@@ -51,4 +51,38 @@ A modern, responsive, and professional healthcare dashboard for managing blood d
 - **Typography**: Outfit (Modern Sans-Serif)
 
 ---
+
+## ⚙️ Backend (Node.js & MySQL)
+
+The backend provides full REST API capabilities with transaction support for blood requests.
+
+### Setup Instructions
+
+1. **Navigate to the backend directory**:
+   ```bash
+   cd backend
+   ```
+
+2. **Install backend dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Database Configuration**:
+   Create a MySQL database named `bloodbank` and run the necessary SQL to create `donor`, `patient`, `bloodstock`, and `request` tables. Update the `backend/.env` file with your credentials:
+   ```env
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASSWORD=yourpassword
+   DB_NAME=bloodbank
+   PORT=5000
+   ```
+
+4. **Start the backend server**:
+   ```bash
+   npm run dev
+   ```
+   The backend API will run on `http://localhost:5000`.
+
+---
 Created with ❤️ for LifeFlow Healthcare.
